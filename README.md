@@ -1,0 +1,2 @@
+# nomadbot
+Starcraft II bot
