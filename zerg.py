@@ -64,7 +64,7 @@ class ZergAgent(base_agent.BaseAgent):
 		if self.unit_type_is_selected(obs, units.Zerg.Larva):
 			free_supply = obs.observation.player.food_cap - obs.observation.player.food_used
 
-			if free_supply == 0:
+			if free_supply <= 2:
 				if self.can_do(obs, actions.FUNCTIONS.Train_Overlord_quick.id):
 					return actions.FUNCTIONS.Train_Overlord_quick('now')
 
