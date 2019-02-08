@@ -8,6 +8,11 @@ class ZergAgent(base_agent.BaseAgent):
 	def step(self, obs):
 		super(ZergAgent, self).step(obs)
 
+		if((len(obs.observation.single_select) > 0 and obs.observation.single_select[0].unit_type == units.Zerg.Larva) or 
+		(len(obs.observation.multi_select) > 0 and obs.observation.multi_select[0].unit_type == units.Zerg.Larva)):
+			if (actions.FUNCTIONS.Train_Drone_quick.id in obs.observation.available_actions):
+				return actions.FUNCTIONS.Train_Drone_quick('now')
+
 		larva_units = [unit for unit in obs.observation.feature_units
 		if unit.unit_type == units.Zerg.Larva]
 
