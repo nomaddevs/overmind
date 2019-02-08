@@ -5,16 +5,73 @@ from pysc2.lib import actions, features, units
 import random
 
 class ZergAgent(base_agent.BaseAgent):
+	def __init__(self):
+		super(ZergAgent, self).__init__()
+
+		self.attack_coordinates = None
+
+	def unit_type_is_selected(self, obs, unit_type):
+		if(len(obs.observation.single_select) > 0 and obs.observation.single_select[0].unit_type == unit_type):
+			return True
+		if(len(obs.observation.multi_select) > 0 and obs.observation.multi_select[0].unit_type == unit_type):
+			return True
+		return False
+
+	def get_units_by_type(self, obs, unit_type):
+		return [unit for unit in obs.observation.feature_units
+		if unit.unit_type == unit_type]
+
+	def can_do(self, obs, action):
+		return action in obs.observation.available_actions
+
 	def step(self, obs):
 		super(ZergAgent, self).step(obs)
 
-		if((len(obs.observation.single_select) > 0 and obs.observation.single_select[0].unit_type == units.Zerg.Larva) or 
-		(len(obs.observation.multi_select) > 0 and obs.observation.multi_select[0].unit_type == units.Zerg.Larva)):
-			if (actions.FUNCTIONS.Train_Drone_quick.id in obs.observation.available_actions):
-				return actions.FUNCTIONS.Train_Drone_quick('now')
+		if obs.first():
+			player_y, player_x = (obs.observation.feature_minimap.player_relative == features.PlayerRelative.SELF).nonzero()
+			xmean = player_x.mean()
+			ymean = player_y.mean()
 
-		larva_units = [unit for unit in obs.observation.feature_units
-		if unit.unit_type == units.Zerg.Larva]
+			if xmean <= 31 and ymean <= 31:
+				self.attack_coordinates = (47, 47)
+			else:
+				self.attack_coordinates = (12, 16)
+
+		zergling_units = self.get_units_by_type(obs, units.Zerg.Zergling)
+
+		if len(zergling_units) >= 10:
+			if self.unit_type_is_selected(obs, units.Zerg.Zergling):
+				if self.can_do(obs, actions.FUNCTIONS.Attack_minimap.id):
+					return actions.FUNCTIONS.Attack_minimap('now', self.attack_coordinates)
+			if self.can_do(obs, actions.FUNCTIONS.select_army.id):
+				return actions.FUNCTIONS.select_army('select')
+
+		spawning_pool_units = self.get_units_by_type(obs, units.Zerg.SpawningPool)
+
+		if len(spawning_pool_units) == 0:
+			if self.unit_type_is_selected(obs, units.Zerg.Drone):
+				if self.can_do(obs, actions.FUNCTIONS.Build_SpawningPool_screen.id):
+					x = random.randint(0, 63)
+					y = random.randint(0, 63)
+					return actions.FUNCTIONS.Build_SpawningPool_screen('now', (x, y))
+
+			drone_units = self.get_units_by_type(obs, units.Zerg.Drone)
+
+			if len(drone_units) > 0:
+				drone_unit = random.choice(drone_units)
+				return actions.FUNCTIONS.select_point('select_all_type', (drone_unit.x, drone_unit.y))
+
+		if self.unit_type_is_selected(obs, units.Zerg.Larva):
+			free_supply = obs.observation.player.food_cap - obs.observation.player.food_used
+
+			if free_supply == 0:
+				if self.can_do(obs, actions.FUNCTIONS.Train_Overlord_quick.id):
+					return actions.FUNCTIONS.Train_Overlord_quick('now')
+
+			if self.can_do(obs, actions.FUNCTIONS.Train_Zergling_quick.id):
+				return actions.FUNCTIONS.Train_Zergling_quick('now')
+
+		larva_units = self.get_units_by_type(obs, units.Zerg.Larva)
 
 		if len(larva_units) > 0:
 			larva_unit = random.choice(larva_units)

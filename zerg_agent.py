@@ -11,12 +11,12 @@ def main(unused_argv):
 	try:
 		while True:
 			with sc2_env.SC2Env(
-				map_name=map,
-				players=[sc2_env.Agent(sc2_env.Race.zerg), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)],
-				agent_interface_format=features.AgentInterfaceFormat(feature_dimensions=features.Dimensions(screen=84, minimap=64), use_feature_units=True),
-				step_mul=16,
-				game_steps_per_episode=0,
-				visualize=False) as env:
+				map_name = map,
+				players = [sc2_env.Agent(sc2_env.Race.zerg), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)],
+				agent_interface_format=features.AgentInterfaceFormat(feature_dimensions = features.Dimensions(screen = 84, minimap = 64), use_feature_units = True),
+				step_mul = 16,
+				game_steps_per_episode = 0,
+				visualize = False) as env:
 					agent.setup(env.observation_spec(), env.action_spec())
 
 					timesteps = env.reset()
