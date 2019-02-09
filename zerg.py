@@ -55,11 +55,11 @@ class ZergAgent(base_agent.BaseAgent):
 					y = random.randint(0, 63)
 					return actions.FUNCTIONS.Build_SpawningPool_screen('now', (x, y))
 
-			drone_units = self.get_units_by_type(obs, units.Zerg.Drone)
+		drone_units = self.get_units_by_type(obs, units.Zerg.Drone)
 
-			if len(drone_units) > 0:
-				drone_unit = random.choice(drone_units)
-				return actions.FUNCTIONS.select_point('select_all_type', (drone_unit.x, drone_unit.y))
+		if len(drone_units) > 0:
+			drone_unit = random.choice(drone_units)
+			return actions.FUNCTIONS.select_point('select_all_type', (drone_unit.x, drone_unit.y))
 
 		if self.unit_type_is_selected(obs, units.Zerg.Larva):
 			free_supply = obs.observation.player.food_cap - obs.observation.player.food_used
