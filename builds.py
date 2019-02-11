@@ -1,7 +1,3 @@
-import sys
-
-build = sys.argv[1]
-
 class BuildStep():
 	def __init__(self, supply_target, building):
 		super()
