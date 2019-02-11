@@ -14,8 +14,7 @@ class ZergAgent(base_agent.BaseAgent):
 		self.overlord_count = 1
 		self.drone_count = 12
 
-
-	def unit_type_is_selected(self, obs, unit_type):
+	def is_selected(self, obs, unit_type):
 		if(len(obs.observation.single_select) > 0 and obs.observation.single_select[0].unit_type == unit_type):
 			return True
 		if(len(obs.observation.multi_select) > 0 and obs.observation.multi_select[0].unit_type == unit_type):
@@ -23,11 +22,13 @@ class ZergAgent(base_agent.BaseAgent):
 		return False
 
 	def get_units_by_type(self, obs, unit_type):
-		return [unit for unit in obs.observation.feature_units
-		if unit.unit_type == unit_type]
+		return [unit for unit in obs.observation.feature_units if unit.unit_type == unit_type]
 
 	def can_do(self, obs, action):
 		return action in obs.observation.available_actions
+
+	def available_supply(self, obs):
+		return obs.observation.player.food_cap - obs.observation.player.food_used
 
 	def free_supply(self, obs):
 		return obs.observation.player.food_cap - obs.observation.player.food_used
@@ -45,7 +46,7 @@ class ZergAgent(base_agent.BaseAgent):
 			else:
 				self.attack_coordinates = (12, 16)
 
-		if self.unit_type_is_selected(obs, units.Zerg.Larva):
+		if self.is_selected(obs, units.Zerg.Larva):
 			if self.free_supply(obs) <= 2:
 				if self.can_do(obs, actions.FUNCTIONS.Train_Overlord_quick.id):
 					return actions.FUNCTIONS.Train_Overlord_quick('now')
@@ -59,8 +60,6 @@ class ZergAgent(base_agent.BaseAgent):
 			return actions.FUNCTIONS.select_point('select_all_type', (larva_unit.x, larva_unit.y))
 
 		return actions.FUNCTIONS.no_op()
-
-
 
 #		drones = self.get_units_by_type(obs, units.Zerg.Drone)
 #		if len(drones) > 0:
