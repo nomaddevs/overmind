@@ -29,6 +29,9 @@ class ZergAgent(base_agent.BaseAgent):
 	def can_do(self, obs, action):
 		return action in obs.observation.available_actions
 
+	def free_supply(self, obs):
+		return obs.observation.player.food_cap - obs.observation.player.food_used
+
 	def step(self, obs):
 		super(ZergAgent, self).step(obs)
 
@@ -42,15 +45,33 @@ class ZergAgent(base_agent.BaseAgent):
 			else:
 				self.attack_coordinates = (12, 16)
 
-		overlords = self.get_units_by_type(obs, units.Zerg.Overlord)
-		if len(overlords) > 0:
-			overlord = random.choice(overlords)
-			return actions.FUNCTIONS.select_point('select_all_type', (overlord.x, overlord.y))
+		if self.unit_type_is_selected(obs, units.Zerg.Larva):
+			if self.free_supply(obs) <= 2:
+				if self.can_do(obs, actions.FUNCTIONS.Train_Overlord_quick.id):
+					return actions.FUNCTIONS.Train_Overlord_quick('now')
+			if self.can_do(obs, actions.FUNCTIONS.Train_Drone_quick.id):
+				return actions.FUNCTIONS.Train_Drone_quick('now')
 
-		drones = self.get_units_by_type(obs, units.Zerg.Drone)
-		if len(drones) > 0:
-			drone = random.choice(drones)
-			return actions.FUNCTIONS.select_point('select_all_type', (drone.x, drone.y))
+		larva_units = self.get_units_by_type(obs, units.Zerg.Larva)
+
+		if len(larva_units) > 0:
+			larva_unit = random.choice(larva_units)
+			return actions.FUNCTIONS.select_point('select_all_type', (larva_unit.x, larva_unit.y))
+
+		return actions.FUNCTIONS.no_op()
+
+
+
+#		drones = self.get_units_by_type(obs, units.Zerg.Drone)
+#		if len(drones) > 0:
+#			drone = random.choice(drones)
+#			return actions.FUNCTIONS.select_point('select_all_type', (drone.x, drone.y))
+
+#		overlords = self.get_units_by_type(obs, units.Zerg.Overlord)
+#		if len(overlords) > 0:
+#			overlord = random.choice(overlords)
+#			return actions.FUNCTIONS.select_point('select_all_type', (overlord.x, overlord.y))
+
 
 #		zergling_units = self.get_units_by_type(obs, units.Zerg.Zergling)
 #
