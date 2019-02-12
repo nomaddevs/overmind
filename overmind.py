@@ -79,7 +79,7 @@ class zerg(base_agent.BaseAgent):
 			else:
 				self.attack_coordinates = (12, 16)
 
-		choice = random.randint(0, 2)
+		choice = random.randint(0, len(self.stepchoices))
 
 		func = self.stepchoices.get(choice, self.skip_step)
 
