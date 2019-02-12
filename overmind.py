@@ -13,6 +13,10 @@ class zerg(base_agent.BaseAgent):
 		self.bases = 1
 		self.overlord_count = 1
 		self.drone_count = 12
+		self.stepchoices = {
+			0: self.macro,
+			1: self.scout
+		}
 
 	def is_selected(self, obs, unit_type):
 		if(len(obs.observation.single_select) > 0 and obs.observation.single_select[0].unit_type == unit_type):
@@ -49,6 +53,19 @@ class zerg(base_agent.BaseAgent):
 
 		return actions.FUNCTIONS.no_op()
 
+	def scout(self, obs):
+		overlords = self.get_units_by_type(obs, units.Zerg.Overlord)
+		if len(overlords) > 0:
+			if self.is_selected(obs, units.Zerg.Overlord):
+				if self.can_do(obs, actions.FUNCTIONS.Move_minimap.id):
+					x = random.randint(0, 63)
+					y = random.randint(0, 63)
+					return actions.FUNCTIONS.Move_minimap('now', (x, y))
+		return actions.FUNCTIONS.no_op()
+
+	def skip_step(self, obs):
+		return actions.FUNCTIONS.no_op()
+
 	def step(self, obs):
 		super(zerg, self).step(obs)
 
@@ -62,7 +79,11 @@ class zerg(base_agent.BaseAgent):
 			else:
 				self.attack_coordinates = (12, 16)
 
-		return self.macro(obs)
+		choice = random.randint(0, 2)
+
+		func = self.stepchoices.get(choice, self.skip_step)
+
+		return func(obs)
 
 #		drones = self.get_units_by_type(obs, units.Zerg.Drone)
 #		if len(drones) > 0:
