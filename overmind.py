@@ -5,9 +5,9 @@ from pysc2.lib import actions, features, units
 import numpy
 import random
 
-class ZergAgent(base_agent.BaseAgent):
+class zerg(base_agent.BaseAgent):
 	def __init__(self):
-		super(ZergAgent, self).__init__()
+		super(zerg, self).__init__()
 
 		self.attack_coordinates = None
 		self.bases = 1
@@ -33,19 +33,7 @@ class ZergAgent(base_agent.BaseAgent):
 	def free_supply(self, obs):
 		return obs.observation.player.food_cap - obs.observation.player.food_used
 
-	def step(self, obs):
-		super(ZergAgent, self).step(obs)
-
-		if obs.first():
-			player_y, player_x = (obs.observation.feature_minimap.player_relative == features.PlayerRelative.SELF).nonzero()
-			xmean = player_x.mean()
-			ymean = player_y.mean()
-
-			if xmean <= 31 and ymean <= 31:
-				self.attack_coordinates = (47, 47)
-			else:
-				self.attack_coordinates = (12, 16)
-
+	def macro(self, obs):
 		if self.is_selected(obs, units.Zerg.Larva):
 			if self.free_supply(obs) <= 2:
 				if self.can_do(obs, actions.FUNCTIONS.Train_Overlord_quick.id):
@@ -60,6 +48,21 @@ class ZergAgent(base_agent.BaseAgent):
 			return actions.FUNCTIONS.select_point('select_all_type', (larva_unit.x, larva_unit.y))
 
 		return actions.FUNCTIONS.no_op()
+
+	def step(self, obs):
+		super(zerg, self).step(obs)
+
+		if obs.first():
+			player_y, player_x = (obs.observation.feature_minimap.player_relative == features.PlayerRelative.SELF).nonzero()
+			xmean = player_x.mean()
+			ymean = player_y.mean()
+ 	
+			if xmean <= 31 and ymean <= 31:
+				self.attack_coordinates = (47, 47)
+			else:
+				self.attack_coordinates = (12, 16)
+
+		return self.macro(obs)
 
 #		drones = self.get_units_by_type(obs, units.Zerg.Drone)
 #		if len(drones) > 0:

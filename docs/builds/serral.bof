@@ -1,30 +1,30 @@
-16 Hatchery
-18 Extractor
-17 Spawning Pool
-19 Queen
-19 Zergling
-21 Metabolic Boost
-30 Hatchery
-32 Queen
-44 Queen
-55 Lair
-55 Extractor
-55 Extractor
-60 Roach Warren
-60 Spore Crawler
-70 Extractor
-70 Extractor
-70 Glial Reconstitution
-70 Roach Speed [start making roaches for defense]
-70 Evolution Chamber
-75 +1 Ranged Attack asap
-80 Zerg Missile Weapons Level 1, Spore Crawler +1 ranged attack
-92 Spire [not necessary till later unless you want the option for Mutas or want to start upgrading for Broods/ corruptors]
-108 Hydralisk Den late because of attack
-108 Hatchery late because of attack
-121 Muscular Augments
-121 Lurker Den Make as many Hydras as you can
-121 Extractor x2 at 4th base, gas needed for lurkers
-166 Zerg Melee Weapons Level 2, Grooved Spines
-166 Pneumatized Carapace
-170 Infestation Pit, Lurker x10 10-12 is a solid number vs most comps
+16,Hatchery
+18,Extractor
+17,Spawning Pool
+19,Queen
+19,Zergling
+21,Metabolic Boost
+30,Hatchery
+32,Queen
+44,Queen
+55,Lair
+55,Extractor
+55,Extractor
+60,Roach Warren
+70,Extractor
+70,Extractor
+70,Glial Reconstitution
+70,Roach Speed
+70,Evolution Chamber
+75,Missile Weapons Level 1
+92,Spire
+108,Hydralisk Den
+108,Hatchery
+121,Muscular Augments
+121,Lurker Den
+121,Extractor
+121,Extractor
+166,Melee Weapons Level 2
+166,Grooved Spines
+166,Pneumatized Carapace
+170,Infestation Pit

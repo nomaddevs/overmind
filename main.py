@@ -1,12 +1,12 @@
 from pysc2.env import sc2_env
 from pysc2.lib import actions, features
 
-from zerg import ZergAgent
+from overmind import zerg
 
 from absl import app
 
 def main(unused_argv):
-	agent = ZergAgent()
+	agent = zerg()
 	map = 'AbyssalReef'
 	try:
 		while True:
