@@ -17,6 +17,7 @@ class zerg(base_agent.BaseAgent):
 			0: self.macro,
 			1: self.scout
 		}
+		self.train_data = []
 
 	def is_selected(self, obs, unit_type):
 		if(len(obs.observation.single_select) > 0 and obs.observation.single_select[0].unit_type == unit_type):
@@ -80,6 +81,11 @@ class zerg(base_agent.BaseAgent):
 				self.attack_coordinates = (12, 16)
 
 		choice = random.randint(0, len(self.stepchoices))
+
+		decision_data = numpy.zeros(len(self.stepchoices))
+		decision_data[choice] = 1
+		print(decision_data)
+		self.train_data.append([y, ])
 
 		func = self.stepchoices.get(choice, self.skip_step)
 

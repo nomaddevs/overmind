@@ -8,8 +8,9 @@ from absl import app
 def main(unused_argv):
 	agent = zerg()
 	map = 'AbyssalReef'
-	agent_iface_fmt = features.AgentInterfaceFormat(feature_dimensions = features.Dimensions(screen = 84, minimap = 64), use_feature_units = True)
-	player_setup = [sc2_env.Agent(sc2_env.Race.zerg), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
+	dims = features.Dimensions(screen = 84, minimap = 64)
+	agent_iface_fmt = features.AgentInterfaceFormat(feature_dimensions = dims, use_feature_units = True)
+	player_setup = [sc2_env.Agent(sc2_env.Race.zerg), sc2_env.Bot(sc2_env.Race.protoss, sc2_env.Difficulty.very_easy)]
 	try:
 		while True:
 			with sc2_env.SC2Env(
