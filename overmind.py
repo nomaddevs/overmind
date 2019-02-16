@@ -1,20 +1,20 @@
 import sc2
 from sc2 import run_game, maps, Race, Difficulty
 from sc2.player import Bot, Computer
-from sc2.constants import HATCHERY, DRONE, OVERLORD, EXTRACTOR, SPAWNINGPOOL, ZERGLING, ROACHWARREN, ROACH
+from sc2.constants import HATCHERY, LARVA, DRONE, OVERLORD, EXTRACTOR, SPAWNINGPOOL, ZERGLING, ROACHWARREN, ROACH
 
 import numpy
 import random
 
 class Overmind(sc2.BotAI):
-	def __init__(self):
-		self.ITERATIONS_PER_MINUTE = 165
-		self.MAX_WORKERS = 70
+    def __init__(self):
+        self.ITERATIONS_PER_MINUTE = 165
+        self.MAX_WORKERS = 70
 
-	async def on_step(self, iteration):
-		self.iteration = iteration
-		await self.distribute_workers()
-		await self.build_workers()
+    async def on_step(self, iteration):
+        self.iteration = iteration
+        await self.distribute_workers()
+        await self.build_workers()
         await self.build_overlords()
         await self.build_extractors()
         await self.expand()
@@ -22,18 +22,30 @@ class Overmind(sc2.BotAI):
         await self.build_offensive_force()
         await self.attack()
 
-	async def build_workers(self):
+    async def intel(self):
+        game_data = np.zeros((self.game_info.map_size[1], self.game_info.map_size[0], 3), np.uint8)
+        for hatch in self.units(HATCHERY):
+            hatch_pos = hatch.position
+            print(hatch_pos)
+            cv2.circle(game_data, (int(hatch_pos[0]), int(hatch_pos[1])), 10, (0, 255, 0), -1)  # BGR
+
+        flipped = cv2.flip(game_data, 0)
+        resized = cv2.resize(flipped, dsize=None, fx=2, fy=2)
+
+        cv2.imshow('Intel', resized)
+        cv2.waitKey(1)
+
+    async def build_workers(self):
         if (len(self.units(HATCHERY)) * 16) > len(self.units(DRONE)) and len(self.units(DRONE)) < self.MAX_WORKERS:
-            for hatch in self.units(HATCHERY).ready.noqueue:
+            for larvae in self.units(LARVA):#.ready.noqueue:
                 if self.can_afford(DRONE):
-                    await self.do(hatch.train(DRONE))
+                    await self.do(larvae.train(DRONE))
 
     async def build_overlords(self):
         if self.supply_left < 5 and not self.already_pending(OVERLORD):
-            hatches = self.units(HATCHERY).ready
-            if hatches.exists:
+            for larvae in self.units(LARVA):
                 if self.can_afford(OVERLORD):
-                    await self.build(OVERLORD, near=hatches.first)
+                    await self.do(larvae.train(OVERLORD))
 
     async def build_extractors(self):
         for hatch in self.units(HATCHERY).ready:
@@ -51,19 +63,20 @@ class Overmind(sc2.BotAI):
         if self.units(HATCHERY).amount < (self.iteration / self.ITERATIONS_PER_MINUTE) and self.can_afford(HATCHERY):
             await self.expand_now()
 
-	async def offensive_force_buildings(self):
-        #print(self.iteration / self.ITERATIONS_PER_MINUTE)
-        if self.units(OVERLORD).ready.exists:
-            overlord = self.units(OVERLORD).ready.random
-
+    async def offensive_force_buildings(self):
+#        print(self.iteration / self.ITERATIONS_PER_MINUTE)
+#        if self.units(OVERLORD).ready.exists:
+#            overlord = self.units(OVERLORD).ready.random
+        hatches = self.units(HATCHERY).ready
+        if hatches.exists:
             if self.units(SPAWNINGPOOL).ready.exists and not self.units(ROACHWARREN):
                 if self.can_afford(ROACHWARREN) and not self.already_pending(ROACHWARREN):
-                    await self.build(ROACHWARREN, near=overlord)
-
-            elif len(self.units(SPAWNINGPOOL)) < ((self.iteration / self.ITERATIONS_PER_MINUTE)/2):
+                    await self.build(ROACHWARREN, near=hatches.first)
+        
+            elif len(self.units(SPAWNINGPOOL)) < 1:
                 if self.can_afford(SPAWNINGPOOL) and not self.already_pending(SPAWNINGPOOL):
-                    await self.build(SPAWNINGPOOL, near=overlord)
-
+                    await self.build(SPAWNINGPOOL, near=hatches.first)
+    
     async def build_offensive_force(self):
         for rw in self.units(ROACHWARREN).ready.noqueue:
             if not self.units(ROACH).amount > self.units(ZERGLING).amount:
@@ -84,10 +97,10 @@ class Overmind(sc2.BotAI):
 
     async def attack(self):
         # {UNIT: [n to fight, n to defend]}
-        aggressive_units = {ZERGLING: [15, 5],
-                            ROACH: [8, 3]}
-
-
+        aggressive_units = {
+            ZERGLING: [15, 5],
+            ROACH: [8, 3]
+        }
         for UNIT in aggressive_units:
             if self.units(UNIT).amount > aggressive_units[UNIT][0] and self.units(UNIT).amount > aggressive_units[UNIT][1]:
                 for s in self.units(UNIT).idle:
