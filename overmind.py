@@ -6,6 +6,8 @@ from sc2.constants import HATCHERY, LARVA, DRONE, OVERLORD, EXTRACTOR, SPAWNINGP
 import numpy
 import random
 
+overmindVersion = "0.0.1"
+
 class Overmind(sc2.BotAI):
     def __init__(self):
         self.ITERATIONS_PER_MINUTE = 165
@@ -13,6 +15,8 @@ class Overmind(sc2.BotAI):
 
     async def on_step(self, iteration):
         self.iteration = iteration
+        if iteration == 0:
+            await self.chat_send("Overmind: Alpha Build {}".format(overmindVersion))
         await self.distribute_workers()
         await self.build_workers()
         await self.build_overlords()
@@ -64,9 +68,6 @@ class Overmind(sc2.BotAI):
             await self.expand_now()
 
     async def offensive_force_buildings(self):
-#        print(self.iteration / self.ITERATIONS_PER_MINUTE)
-#        if self.units(OVERLORD).ready.exists:
-#            overlord = self.units(OVERLORD).ready.random
         hatches = self.units(HATCHERY).ready
         if hatches.exists:
             if self.units(SPAWNINGPOOL).ready.exists and not self.units(ROACHWARREN):
@@ -78,14 +79,18 @@ class Overmind(sc2.BotAI):
                     await self.build(SPAWNINGPOOL, near=hatches.first)
     
     async def build_offensive_force(self):
-        for rw in self.units(ROACHWARREN).ready.noqueue:
-            if not self.units(ROACH).amount > self.units(ZERGLING).amount:
-                if self.can_afford(ROACH) and self.supply_left > 0:
-                    await self.do(rw.train(ROACH))
+        larvae = self.units(LARVA)
+        if larvae.exists and self.supply_left > 0:
+            if self.can_afford(ZERGLING) and self.units(SPAWNINGPOOL).ready.exists:
+                await self.do(larvae.random.train(ZERGLING))
+            if self.can_afford(ROACH) and self.units(ROACHWARREN).ready.exists:
+                await self.do(larvae.random.train(ROACH))
 
-        for sp in self.units(SPAWNINGPOOL).ready.noqueue:
-            if self.can_afford(ZERGLING) and self.supply_left > 0:
-                await self.do(sp.train(ZERGLING))
+#            if not self.units(ROACH).amount > self.units(ZERGLING).amount:
+#                if self.can_afford(ROACH) and self.supply_left > 0:
+#                    await self.do(larvae.train(ROACH))
+#            if self.can_afford(ZERGLING) and self.supply_left > 0:
+#                await self.do(larvae.train(ZERGLING))
 
     def find_target(self, state):
         if len(self.known_enemy_units) > 0:
@@ -96,11 +101,11 @@ class Overmind(sc2.BotAI):
             return self.enemy_start_locations[0]
 
     async def attack(self):
-        # {UNIT: [n to fight, n to defend]}
         aggressive_units = {
             ZERGLING: [15, 5],
             ROACH: [8, 3]
         }
+        # {UNIT: [n to fight, n to defend]}
         for UNIT in aggressive_units:
             if self.units(UNIT).amount > aggressive_units[UNIT][0] and self.units(UNIT).amount > aggressive_units[UNIT][1]:
                 for s in self.units(UNIT).idle:
