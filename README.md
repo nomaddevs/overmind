@@ -5,7 +5,7 @@ This bot is designed for the Zerg race.
 
 ## Install
 ```
-$ pip install pysc2
+$ pip install sc2
 $ git clone https://github.com/nomaddevs/overmind.git
 ```
 

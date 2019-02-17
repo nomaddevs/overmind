@@ -15,8 +15,8 @@ class Overmind(sc2.BotAI):
 
     async def on_step(self, iteration):
         self.iteration = iteration
-        if iteration == 0:
-            await self.chat_send("Overmind: Alpha Build {}".format(overmindVersion))
+#        if iteration == 0:
+#            await self.chat_send("Overmind: Alpha Build {}".format(overmindVersion))
         await self.distribute_workers()
         await self.build_workers()
         await self.build_overlords()
@@ -64,7 +64,7 @@ class Overmind(sc2.BotAI):
                     await self.do(worker.build(EXTRACTOR, vespene))
 
     async def expand(self):
-        if self.units(HATCHERY).amount < (self.iteration / self.ITERATIONS_PER_MINUTE) and self.can_afford(HATCHERY):
+        if self.units(HATCHERY).amount < 70 and self.can_afford(HATCHERY):
             await self.expand_now()
 
     async def offensive_force_buildings(self):
@@ -80,17 +80,11 @@ class Overmind(sc2.BotAI):
     
     async def build_offensive_force(self):
         larvae = self.units(LARVA)
-        if larvae.exists and self.supply_left > 0:
-            if self.can_afford(ZERGLING) and self.units(SPAWNINGPOOL).ready.exists:
-                await self.do(larvae.random.train(ZERGLING))
+        if larvae.exists and self.supply_left > 1:
             if self.can_afford(ROACH) and self.units(ROACHWARREN).ready.exists:
                 await self.do(larvae.random.train(ROACH))
-
-#            if not self.units(ROACH).amount > self.units(ZERGLING).amount:
-#                if self.can_afford(ROACH) and self.supply_left > 0:
-#                    await self.do(larvae.train(ROACH))
-#            if self.can_afford(ZERGLING) and self.supply_left > 0:
-#                await self.do(larvae.train(ZERGLING))
+            if self.can_afford(ZERGLING) and self.units(SPAWNINGPOOL).ready.exists:
+                await self.do(larvae.random.train(ZERGLING))
 
     def find_target(self, state):
         if len(self.known_enemy_units) > 0:
